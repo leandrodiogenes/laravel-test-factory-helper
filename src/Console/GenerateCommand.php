@@ -2,6 +2,7 @@
 
 namespace Mpociot\LaravelTestFactoryHelper\Console;
 
+use Composer\Autoload\ClassMapGenerator;
 use Doctrine\DBAL\Types\Type;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -173,8 +174,22 @@ class GenerateCommand extends Command
         return $output;
     }
 
+    protected function loadModels($models = []) {
+        $models = array();
 
-    protected function loadModels($models = [])
+        $dir    = $this->laravel->path($this->dir);
+        $dirs   = glob($dir, GLOB_ONLYDIR);
+        foreach($dirs as $dir) {
+            if(file_exists($dir)) {
+                foreach(ClassMapGenerator::createMap($dir) as $model => $path) {
+                    $models[] = $model;
+                }
+            }
+        }
+        return $models;
+    }
+
+/*    protected function loadModels($models = [])
     {
         if (!empty($models)) {
             return array_map(function ($name) {
@@ -203,7 +218,7 @@ class GenerateCommand extends Command
                 $file->getPath() . DIRECTORY_SEPARATOR . basename($file->getFilename(), '.php')
             );
         }, $this->files->allFiles($this->dir));
-    }
+    }*/
 
     /**
      * Load the properties from the database table.
